@@ -3,7 +3,7 @@
 #define BLYNK_TEMPLATE_ID "TMPLr7lELXbt"
 #define BLYNK_DEVICE_NAME "dmapanel"
 
-#define BLYNK_FIRMWARE_VERSION "0.1.2"
+#define BLYNK_FIRMWARE_VERSION "0.2.0"
 
 #define BLYNK_PRINT Serial
 //#define BLYNK_DEBUG

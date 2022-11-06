@@ -95,3 +95,4 @@
   #define DEBUG_PRINTF(...)
 #endif
 
+#define VIRTPIN_TERMINAL 99

@@ -129,6 +129,8 @@ bool parseURL(String url, String& protocol, String& host, int& port, String& uri
 void enterOTA() {
   BlynkState::set(MODE_OTA_UPGRADE);
 
+  Blynk.virtualWrite(VIRTPIN_TERMINAL, "OTA Update found! Updating...");
+
   // Disconnect, not to interfere with OTA process
   Blynk.disconnect();
 
