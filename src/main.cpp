@@ -18,6 +18,12 @@
 
 #include "BlynkEdgent.h"
 #include "BlynkEvents.h"
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+#include "TimeAlarm.h"
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org");
 
 void setup()
 {
@@ -26,9 +32,20 @@ void setup()
 
   BlynkEdgent.begin();
   beginEvents();
+  timeClient.begin();
 }
+
+bool everConnected = false;
 
 void loop()
 {
   BlynkEdgent.run();
+  timeClient.update();
+
+  if (BlynkState::get() == MODE_RUNNING) {
+    everConnected = true;
+  }
+  if (everConnected) {
+    runAlarms(timeClient);
+  }
 }
