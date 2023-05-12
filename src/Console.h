@@ -204,6 +204,10 @@ void console_init()
     }
   });
 
+  edgentConsole.addCommand("time", [](int argc, const char** argv) {
+    printff("Now:  %d:%d:%d\n", timeClient.getHours(), timeClient.getMinutes(), timeClient.getSeconds());
+  });
+
   edgentConsole.addCommand("status", [](int argc, const char** argv) {
     const uint64_t t = micros64() / 1000000;
     unsigned secs = t % BLYNK_SECS_PER_MIN;

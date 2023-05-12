@@ -19,14 +19,15 @@
 // Terminal widget datastream
 #define VIRTPIN_TERMINAL V99
 
-#include "BlynkEdgent.h"
-#include "BlynkEvents.h"
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-#include "TimeAlarm.h"
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
+
+#include "BlynkEdgent.h"
+#include "BlynkEvents.h"
+#include "TimeAlarm.h"
 
 void setup()
 {
