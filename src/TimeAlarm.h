@@ -4,6 +4,7 @@
 #include <NTPClient.h>
 #include <TimeLib.h>
 #include <AlarmSound.h>
+#include <EEPROM.h>
 
 typedef struct
 {
@@ -19,6 +20,7 @@ typedef struct
     bool playing;
     unsigned int duration;
     unsigned int playStartTime;
+    unsigned int pauseUntil;
     void (*handler)();
 } Alarm;
 
@@ -57,6 +59,9 @@ void run(Alarm *alarm)
 
     if (timeEquals(alarm->alarmTime, t))
     {
+        if (alarm->pauseUntil != 0 && millis() - alarm->pauseUntil > 0) {
+            return;
+        }
         alarm->playing = true;
         alarm->playStartTime = millis();
         resetBeforePlay();
@@ -70,7 +75,7 @@ void alarmHandler()
     play();
 }
 
-Alarm Alarm1;
+Alarm DefaultAlarm;
 
 const unsigned int runInterval = 1000;
 unsigned int lastRun = 0UL;
@@ -78,7 +83,7 @@ bool firstRun = true;
 
 void runAlarms(NTPClient time)
 {
-    run(&Alarm1);
+    run(&DefaultAlarm);
     if (millis() - lastRun < runInterval)
     {
         return;
@@ -87,9 +92,19 @@ void runAlarms(NTPClient time)
     setTime(time.getHours(), time.getMinutes(), time.getSeconds(), time.getDay(), 0, 0);
     lastRun = millis();
 
+    // get saved alarm
+    EEPROM.begin(3096);
+    uint8_t active = EEPROM.read(3089);
+    uint8_t hour = EEPROM.read(3090);
+    uint8_t minute = EEPROM.read(3091);
+    EEPROM.end();
+
+    DefaultAlarm.alarmTime = {hour, minute};
+    DefaultAlarm.active = active == 1;
+
     if (firstRun)
     {
-        Alarm1 = {.alarmTime = {12, 36, 00}, .active = true, .duration = playDuration, .handler = alarmHandler};
+        DefaultAlarm = {.alarmTime = {12, 36, 00}, .active = true, .duration = playDuration, .handler = alarmHandler};
         Serial.println("Alarm registered!");
         firstRun = false;
     }

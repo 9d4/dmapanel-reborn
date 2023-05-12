@@ -1,5 +1,7 @@
 
 #include <Blynk/BlynkConsole.h>
+#include <EEPROM.h>
+#include <TimeAlarm.h>
 
 BlynkConsole    edgentConsole;
 
@@ -100,6 +102,83 @@ void console_init()
       edgentConsole.printf(" App size:  %dK (%d%%)\n", sketchSize/1024, (sketchSize*100)/partSize);
       edgentConsole.printf(" App MD5:   %s\n", ESP.getSketchMD5().c_str());
 
+    }
+  });
+
+  edgentConsole.addCommand("alarm", [](int argc, const char** argv) {
+    if (argc < 1 || 0 == strcmp(argv[0], "show")) {
+      EEPROM.begin(3096);
+      uint8_t active = EEPROM.read(3089);
+      uint8_t hour = EEPROM.read(3090);
+      uint8_t minute = EEPROM.read(3091);
+      EEPROM.end();
+
+      String activeStr;
+      if (active == 1) {
+        activeStr = "on";
+      }else {
+        activeStr = "off";
+      }
+
+      edgentConsole.printf("Alarm at %d:%d %s\n", hour, minute, activeStr.c_str());
+      return;
+    }
+
+    if (0 == strcmp(argv[0], "stop")) {
+      DefaultAlarm.playing = false;
+      DefaultAlarm.pauseUntil = millis() + (1000 * 60); // pause at least 1 min to prevent replay;
+    }
+
+    if (0 == strcmp(argv[0], "on")) {
+      EEPROM.begin(3096);
+      EEPROM.write(3089, 1);
+      if (EEPROM.commit()) {
+        edgentConsole.printf("Alarm on!\n");
+      }else {
+        edgentConsole.printf("Cannot edit alarm!");
+      }
+      EEPROM.end();
+    }
+
+    if (0 == strcmp(argv[0], "off")) {
+      EEPROM.begin(3096);
+      EEPROM.write(3089, 0);
+      if (EEPROM.commit()) {
+        edgentConsole.printf("Alarm off!\n");
+      }else {
+        edgentConsole.printf("Cannot edit alarm!");
+      }
+      EEPROM.end();
+    }
+
+    if (0 == strcmp(argv[0], "set")) {
+      if (argc < 3) {
+        edgentConsole.printf("Command invalid!\n");
+        edgentConsole.printf("Usage: alarm set {hour} {minute}\n");
+        return;
+      }
+
+      int hour = atoi(String(argv[1]).c_str());
+      int minute = atoi(String(argv[2]).c_str());
+
+      if (
+        hour > 24 || hour < 0 ||
+        minute > 60 || minute < 0
+      ) {
+        edgentConsole.printf("Invalid time input!\n");
+        return;
+      }
+
+      EEPROM.begin(3096);
+      EEPROM.write(3090, hour);
+      EEPROM.write(3091, minute);
+      if (EEPROM.commit()) {
+        edgentConsole.printf("Alarm set! %d:%d\n", hour, minute);
+      }else {
+        edgentConsole.printf("Cannot save alarm\n");
+      }
+      EEPROM.end();
+      return;
     }
   });
 

@@ -1,3 +1,6 @@
+#ifndef CONFIG_STORE_H
+#define CONFIG_STORE_H
+
 
 #define CONFIG_FLAG_VALID       0x01
 #define CONFIG_FLAG_STATIC_IP   0x02
@@ -28,6 +31,8 @@ struct ConfigStore {
   uint32_t  staticDNS2;
 
   int       last_error;
+
+  int       alarmHour;
 
   void setFlag(uint8_t mask, bool value) {
     if (value) {
@@ -155,3 +160,4 @@ void config_set_last_error(int error) {
   }
 }
 
+#endif
