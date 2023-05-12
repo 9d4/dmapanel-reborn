@@ -37,19 +37,16 @@ void setup()
   BlynkEdgent.begin();
   beginEvents();
   timeClient.begin();
+  timeClient.setTimeOffset(7 * 60 * 60); // TODO: dynamic value and save to EEPROM instead
+  timeClient.setUpdateInterval(60 * 1000);
 }
-
-bool everConnected = false;
 
 void loop()
 {
   BlynkEdgent.run();
   timeClient.update();
 
-  if (BlynkState::get() == MODE_RUNNING) {
-    everConnected = true;
-  }
-  if (everConnected) {
+  if (timeClient.isTimeSet()) {
     runAlarms(timeClient);
   }
 }
