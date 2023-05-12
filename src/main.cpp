@@ -16,6 +16,9 @@
 //#define USE_WITTY_CLOUD_BOARD
 //#define USE_WEMOS_D1_MINI
 
+// Terminal widget datastream
+#define VIRTPIN_TERMINAL V99
+
 #include "BlynkEdgent.h"
 #include "BlynkEvents.h"
 #include <NTPClient.h>

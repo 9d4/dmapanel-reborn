@@ -5,16 +5,38 @@
 
 BlynkConsole    edgentConsole;
 
+template <typename T>
+void print(T val) {
+  edgentConsole.print(val);
+  Blynk.virtualWrite(VIRTPIN_TERMINAL, val);
+}
+
+template <typename T1, typename T2>
+void print(T1 val1, T2 val2) {
+  edgentConsole.print(val1, val2);
+  Blynk.virtualWrite(VIRTPIN_TERMINAL, val1, val2);
+}
+
+void printff(const char *fmt, ... ) {
+  char buf[256];
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(buf, sizeof(buf), fmt, args);
+  va_end(args);
+  edgentConsole.print(buf);
+  Blynk.virtualWrite(VIRTPIN_TERMINAL, buf);
+}
+
 void console_init()
 {
 #ifdef BLYNK_PRINT
   edgentConsole.begin(BLYNK_PRINT);
 #endif
 
-  edgentConsole.print("\n>");
+  print("\n>");
 
   edgentConsole.addCommand("reboot", []() {
-    edgentConsole.print(R"json({"status":"OK","msg":"rebooting wifi module"})json" "\n");
+    print(R"json({"status":"OK","msg":"rebooting wifi module"})json" "\n");
     delay(100);
     restartMCU();
   });
@@ -28,7 +50,7 @@ void console_init()
   });
 
   edgentConsole.addCommand("devinfo", []() {
-    edgentConsole.printf(
+    printff(
         R"json({"name":"%s","board":"%s","tmpl_id":"%s","fw_type":"%s","fw_ver":"%s"})json" "\n",
         getWiFiName().c_str(),
         BLYNK_TEMPLATE_NAME,
@@ -64,7 +86,7 @@ void console_init()
 
   edgentConsole.addCommand("wifi", [](int argc, const char* argv[]) {
     if (argc < 1 || 0 == strcmp(argv[0], "show")) {
-      edgentConsole.printf(
+      printff(
           "mac:%s ip:%s (%s [%s] %ddBm)\n",
           getWiFiMacAddress().c_str(),
           WiFi.localIP().toString().c_str(),
@@ -76,7 +98,7 @@ void console_init()
       int found = WiFi.scanNetworks();
       for (int i = 0; i < found; i++) {
         bool current = (WiFi.SSID(i) == WiFi.SSID());
-        edgentConsole.printf(
+        printff(
             "%s %s [%s] %s ch:%d rssi:%d\n",
             (current ? "*" : " "), WiFi.SSID(i).c_str(),
             macToString(WiFi.BSSID(i)).c_str(),
@@ -93,14 +115,14 @@ void console_init()
       unsigned sketchSize = ESP.getSketchSize();
       unsigned partSize = sketchSize + ESP.getFreeSketchSpace();
 
-      edgentConsole.printf(" Version:   %s (build %s)\n", BLYNK_FIRMWARE_VERSION, __DATE__ " " __TIME__);
-      edgentConsole.printf(" Type:      %s\n", BLYNK_FIRMWARE_TYPE);
-      edgentConsole.printf(" Platform:  %s\n", BLYNK_INFO_DEVICE);
-      edgentConsole.printf(" SDK:       %s\n", ESP.getSdkVersion());
-      edgentConsole.printf(" ESP Core:  %s\n", ESP.getCoreVersion().c_str());
+      printff(" Version:   %s (build %s)\n", BLYNK_FIRMWARE_VERSION, __DATE__ " " __TIME__);
+      printff(" Type:      %s\n", BLYNK_FIRMWARE_TYPE);
+      printff(" Platform:  %s\n", BLYNK_INFO_DEVICE);
+      printff(" SDK:       %s\n", ESP.getSdkVersion());
+      printff(" ESP Core:  %s\n", ESP.getCoreVersion().c_str());
 
-      edgentConsole.printf(" App size:  %dK (%d%%)\n", sketchSize/1024, (sketchSize*100)/partSize);
-      edgentConsole.printf(" App MD5:   %s\n", ESP.getSketchMD5().c_str());
+      printff(" App size:  %dK (%d%%)\n", sketchSize/1024, (sketchSize*100)/partSize);
+      printff(" App MD5:   %s\n", ESP.getSketchMD5().c_str());
 
     }
   });
@@ -120,7 +142,7 @@ void console_init()
         activeStr = "off";
       }
 
-      edgentConsole.printf("Alarm at %d:%d %s\n", hour, minute, activeStr.c_str());
+      printff("Alarm at %d:%d %s\n", hour, minute, activeStr.c_str());
       return;
     }
 
@@ -133,9 +155,9 @@ void console_init()
       EEPROM.begin(3096);
       EEPROM.write(3089, 1);
       if (EEPROM.commit()) {
-        edgentConsole.printf("Alarm on!\n");
+        printff("Alarm on!\n");
       }else {
-        edgentConsole.printf("Cannot edit alarm!");
+        printff("Cannot edit alarm!");
       }
       EEPROM.end();
     }
@@ -144,17 +166,17 @@ void console_init()
       EEPROM.begin(3096);
       EEPROM.write(3089, 0);
       if (EEPROM.commit()) {
-        edgentConsole.printf("Alarm off!\n");
+        printff("Alarm off!\n");
       }else {
-        edgentConsole.printf("Cannot edit alarm!");
+        printff("Cannot edit alarm!");
       }
       EEPROM.end();
     }
 
     if (0 == strcmp(argv[0], "set")) {
       if (argc < 3) {
-        edgentConsole.printf("Command invalid!\n");
-        edgentConsole.printf("Usage: alarm set {hour} {minute}\n");
+        printff("Command invalid!\n");
+        printff("Usage: alarm set {hour} {minute}\n");
         return;
       }
 
@@ -165,7 +187,7 @@ void console_init()
         hour > 24 || hour < 0 ||
         minute > 60 || minute < 0
       ) {
-        edgentConsole.printf("Invalid time input!\n");
+        printff("Invalid time input!\n");
         return;
       }
 
@@ -173,9 +195,9 @@ void console_init()
       EEPROM.write(3090, hour);
       EEPROM.write(3091, minute);
       if (EEPROM.commit()) {
-        edgentConsole.printf("Alarm set! %d:%d\n", hour, minute);
+        printff("Alarm set! %d:%d\n", hour, minute);
       }else {
-        edgentConsole.printf("Cannot save alarm\n");
+        printff("Cannot save alarm\n");
       }
       EEPROM.end();
       return;
@@ -192,17 +214,17 @@ void console_init()
     uint32_t heap_free; uint16_t heap_max;
     uint8_t heap_frag;
     ESP.getHeapStats(&heap_free, &heap_max, &heap_frag);
-    edgentConsole.printf(" Uptime:          %dd %dh %dm %ds\n", days, hrs, mins, secs);
-    edgentConsole.printf(" Reset reason:    %s\n",        ESP.getResetReason().c_str());
-    edgentConsole.printf(" Flash:           %dK\n",       ESP.getFlashChipSize() / 1024);
-    edgentConsole.printf(" Stack unused:    %d\n",        ESP.getFreeContStack());
-    edgentConsole.printf(" Heap free:       %d / %d\n",   heap_free, heap_max);
-    edgentConsole.printf("      fragment:   %d\n",        heap_frag);
-    edgentConsole.printf("      max alloc:  %d\n",        ESP.getMaxFreeBlockSize());
+    printff(" Uptime:          %dd %dh %dm %ds\n", days, hrs, mins, secs);
+    printff(" Reset reason:    %s\n",        ESP.getResetReason().c_str());
+    printff(" Flash:           %dK\n",       ESP.getFlashChipSize() / 1024);
+    printff(" Stack unused:    %d\n",        ESP.getFreeContStack());
+    printff(" Heap free:       %d / %d\n",   heap_free, heap_max);
+    printff("      fragment:   %d\n",        heap_frag);
+    printff("      max alloc:  %d\n",        ESP.getMaxFreeBlockSize());
 #ifdef BLYNK_FS
     FSInfo fs_info;
     BLYNK_FS.info(fs_info);
-    edgentConsole.printf(" FS free:         %d / %d\n",   (fs_info.totalBytes-fs_info.usedBytes), fs_info.totalBytes);
+    printff(" FS free:         %d / %d\n",   (fs_info.totalBytes-fs_info.usedBytes), fs_info.totalBytes);
 #endif
   });
 
@@ -220,7 +242,7 @@ void console_init()
       md5.calculate();
       String md5str = md5.toString();
 
-      edgentConsole.printf("%8d %-24s %s\n",
+      printff("%8d %-24s %s\n",
                             f.size(), dir.fileName().c_str(),
                             md5str.substring(0,8).c_str());
     }
@@ -232,9 +254,9 @@ void console_init()
     for (int i=0; i<argc; i++) {
       const char* fn = argv[i];
       if (BLYNK_FS.remove(fn)) {
-        edgentConsole.printf("Removed %s\n", fn);
+        printff("Removed %s\n", fn);
       } else {
-        edgentConsole.printf("Removing %s failed\n", fn);
+        printff("Removing %s failed\n", fn);
       }
     }
   });
@@ -285,8 +307,6 @@ BLYNK_WRITE(InternalPinDBG) {
   String cmd = String(param.asStr()) + "\n";
   edgentConsole.runCommand((char*)cmd.c_str());
 }
-
-#define VIRTPIN_TERMINAL V99
 
 BLYNK_WRITE(VIRTPIN_TERMINAL) {
   String cmd = String(param.asStr()) + "\n";
