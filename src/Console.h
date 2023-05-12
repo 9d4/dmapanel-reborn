@@ -286,6 +286,8 @@ BLYNK_WRITE(InternalPinDBG) {
   edgentConsole.runCommand((char*)cmd.c_str());
 }
 
+#define VIRTPIN_TERMINAL V99
+
 BLYNK_WRITE(VIRTPIN_TERMINAL) {
   String cmd = String(param.asStr()) + "\n";
   edgentConsole.runCommand((char*)cmd.c_str());
