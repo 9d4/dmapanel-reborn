@@ -53,7 +53,6 @@ void run(Alarm *alarm)
         }
 
         alarm->handler();
-        Serial.printf("\rRinging...%ds ", (millis() - alarm->playStartTime) / 1000);
 
         return;
     }
