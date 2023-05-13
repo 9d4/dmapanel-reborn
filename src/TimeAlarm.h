@@ -21,6 +21,7 @@ typedef struct
     unsigned int duration;
     unsigned int playStartTime;
     unsigned int pauseUntil;
+    bool paused;
     void (*handler)();
 } Alarm;
 
@@ -61,10 +62,11 @@ void run(Alarm *alarm)
 
     if (timeEquals(alarm->alarmTime, t))
     {
-        if (alarm->pauseUntil != 0 && millis() - alarm->pauseUntil > 0) {
+        if (alarm->paused && millis() - alarm->pauseUntil > 0) {
             return;
         }
         alarm->playing = true;
+        alarm->paused = false;
         alarm->playStartTime = millis();
         resetBeforePlay();
         Serial.printf("Alarm match time! %d:%d\n", hour(), minute());
