@@ -48,7 +48,6 @@ void run(Alarm *alarm)
         if (millis() - alarm->playStartTime >= alarm->duration)
         {
             alarm->playing = false;
-            digitalWrite(ALARM_TRIGGER_GPIO, ALARM_TRIGGER_GPIO_DEFAULT);
             Serial.println("Alarm stopping...");
             return;
         }
@@ -56,6 +55,8 @@ void run(Alarm *alarm)
         alarm->handler();
 
         return;
+    } else {
+        digitalWrite(ALARM_TRIGGER_GPIO, ALARM_TRIGGER_GPIO_DEFAULT);
     }
 
     if (timeEquals(alarm->alarmTime, t))
