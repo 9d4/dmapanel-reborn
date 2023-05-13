@@ -49,6 +49,7 @@ void run(Alarm *alarm)
         if (millis() - alarm->playStartTime >= alarm->duration)
         {
             alarm->playing = false;
+            alarm->paused = false;
             Serial.println("Alarm stopping...");
             return;
         }

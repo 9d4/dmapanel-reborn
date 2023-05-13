@@ -146,7 +146,7 @@ void console_init()
       return;
     }
 
-    if (0 == strcmp(argv[0], "stop")) {
+    if (0 == strcmp(argv[0], "stop") && DefaultAlarm.playing) {
       DefaultAlarm.playing = false;
       DefaultAlarm.pauseUntil = millis() + (1000 * 60); // pause at least 1 min to prevent replay;
       DefaultAlarm.paused = true;
