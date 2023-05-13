@@ -63,7 +63,7 @@ void run(Alarm *alarm)
 
     if (timeEquals(alarm->alarmTime, t))
     {
-        if (alarm->paused && millis() - alarm->pauseUntil > 0) {
+        if (alarm->paused && alarm->pauseUntil - millis() > 0) {
             return;
         }
         alarm->playing = true;
