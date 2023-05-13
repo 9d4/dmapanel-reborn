@@ -19,6 +19,12 @@
 // Terminal widget datastream
 #define VIRTPIN_TERMINAL V99
 
+// PIN to be triggerred when alarm is playing.
+#define ALARM_TRIGGER_GPIO D6
+// Default state
+#define ALARM_TRIGGER_GPIO_DEFAULT HIGH
+#define ALARM_TRIGGER_GPIO_ACTIVE LOW
+
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 

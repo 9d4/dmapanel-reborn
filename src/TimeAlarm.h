@@ -48,6 +48,7 @@ void run(Alarm *alarm)
         if (millis() - alarm->playStartTime >= alarm->duration)
         {
             alarm->playing = false;
+            digitalWrite(ALARM_TRIGGER_GPIO, ALARM_TRIGGER_GPIO_DEFAULT);
             Serial.println("Alarm stopping...");
             return;
         }
@@ -73,6 +74,7 @@ void run(Alarm *alarm)
 void alarmHandler()
 {
     play();
+    digitalWrite(ALARM_TRIGGER_GPIO, ALARM_TRIGGER_GPIO_ACTIVE);
 }
 
 Alarm DefaultAlarm;
@@ -105,6 +107,8 @@ void runAlarms(NTPClient time)
     if (firstRun)
     {
         DefaultAlarm = {.alarmTime = {12, 36, 00}, .active = true, .duration = playDuration, .handler = alarmHandler};
+        pinMode(ALARM_TRIGGER_GPIO, OUTPUT);
+        digitalWrite(ALARM_TRIGGER_GPIO, ALARM_TRIGGER_GPIO_DEFAULT);
         Serial.println("Alarm registered!");
         firstRun = false;
     }
