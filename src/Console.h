@@ -127,6 +127,11 @@ void console_init()
     }
   });
 
+  edgentConsole.addCommand("tank", [](int argc, const char** argv) {
+    int16_t value = analogRead(A0);
+    printff("%d\n", value);
+  });
+
   edgentConsole.addCommand("alarm", [](int argc, const char** argv) {
     if (argc < 1 || 0 == strcmp(argv[0], "show")) {
       EEPROM.begin(3096);

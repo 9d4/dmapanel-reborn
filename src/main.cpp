@@ -3,7 +3,7 @@
 #define BLYNK_TEMPLATE_ID "TMPLr7lELXbt"
 #define BLYNK_DEVICE_NAME "dmapanel"
 
-#define BLYNK_FIRMWARE_VERSION "1.0.3"
+#define BLYNK_FIRMWARE_VERSION "1.1.0"
 
 #define BLYNK_PRINT Serial
 //#define BLYNK_DEBUG
@@ -45,6 +45,11 @@ void setup()
   timeClient.begin();
   timeClient.setTimeOffset(7 * 60 * 60); // TODO: dynamic value and save to EEPROM instead
   timeClient.setUpdateInterval(60 * 1000);
+
+  // ============================================
+  // TANK CAPACITY METER
+  // ============================================
+  pinMode(A0, INPUT);
 }
 
 void loop()
