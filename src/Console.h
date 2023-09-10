@@ -128,6 +128,24 @@ void console_init()
   });
 
   edgentConsole.addCommand("tank", [](int argc, const char** argv) {
+    if (argc > 0 && (0 == strcmp(argv[0], "high") || 0 == strcmp(argv[0], "up"))) {
+      int8_t val = digitalRead(TANK_HIGH_PIN);
+      printff("%d\n", val);
+      return;
+    }
+    if (argc > 0 && (0 == strcmp(argv[0], "low") || 0 == strcmp(argv[0], "down"))) {
+      int8_t val = digitalRead(TANK_LOW_PIN);
+      printff("%d\n", val);
+      return;
+    }
+    if (argc > 0 && 0 == strcmp(argv[0], "all")) {
+      int valLow = digitalRead(TANK_LOW_PIN);
+      int valHigh = digitalRead(TANK_HIGH_PIN);
+
+      printff("Low:%d \tHigh: %d\n", valLow, valHigh);
+      return;
+    }
+
     int16_t value = analogRead(A0);
     printff("%d\n", value);
   });

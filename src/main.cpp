@@ -20,10 +20,22 @@
 #define VIRTPIN_TERMINAL V99
 
 // PIN to be triggerred when alarm is playing.
-#define ALARM_TRIGGER_GPIO D6
+#define ALARM_TRIGGER_GPIO D7
 // Default state
 #define ALARM_TRIGGER_GPIO_DEFAULT HIGH
 #define ALARM_TRIGGER_GPIO_ACTIVE LOW
+
+// TANK
+#define TANK_HIGH_PIN D5
+#define TANK_LOW_PIN D6
+#define TANK_PIN_DEFAULT LOW
+#define TANK_PIN_ACTIVE HIGH
+#define TANK_PIN_PULL HIGH
+
+#define TANK_PUMP_PIN 2
+#define TANK_PUMP_VPIN 0
+#define TANK_PUMP_VPIN_HIGH 0
+#define TANK_PUMP_VPIN_LOW 1
 
 #include <NTPClient.h>
 #include <WiFiUdp.h>
@@ -34,6 +46,7 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org");
 #include "BlynkEdgent.h"
 #include "BlynkEvents.h"
 #include "TimeAlarm.h"
+#include "Tank.h"
 
 void setup()
 {
@@ -49,7 +62,7 @@ void setup()
   // ============================================
   // TANK CAPACITY METER
   // ============================================
-  pinMode(A0, INPUT);
+  setupTank();
 }
 
 void loop()
@@ -60,4 +73,5 @@ void loop()
   if (timeClient.isTimeSet()) {
     runAlarms(timeClient);
   }
+  runTank();
 }
