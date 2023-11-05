@@ -19,34 +19,15 @@
 // Terminal widget datastream
 #define VIRTPIN_TERMINAL V99
 
-// PIN to be triggerred when alarm is playing.
-#define ALARM_TRIGGER_GPIO D7
-// Default state
-#define ALARM_TRIGGER_GPIO_DEFAULT HIGH
-#define ALARM_TRIGGER_GPIO_ACTIVE LOW
-
-// TANK
-#define TANK_HIGH_PIN D5
-#define TANK_LOW_PIN D6
-#define TANK_PIN_DEFAULT LOW
-#define TANK_PIN_ACTIVE HIGH
-#define TANK_PIN_PULL HIGH
-
-#define TANK_PUMP_PIN 2
-#define TANK_PUMP_VPIN 0
-#define TANK_PUMP_VPIN_HIGH 0
-#define TANK_PUMP_VPIN_LOW 1
-
+#include <ESP8266WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org");
+#include <PubSubClient.h>
 
 #include "BlynkEdgent.h"
 #include "BlynkEvents.h"
-#include "TimeAlarm.h"
-#include "Tank.h"
+#include "LocalOTA.h"
+#include "MQTT.h"
 
 void setup()
 {
@@ -55,23 +36,32 @@ void setup()
 
   BlynkEdgent.begin();
   beginEvents();
-  timeClient.begin();
-  timeClient.setTimeOffset(7 * 60 * 60); // TODO: dynamic value and save to EEPROM instead
-  timeClient.setUpdateInterval(60 * 1000);
+  localOTASetup();
+  mqttBegin();
+}
 
-  // ============================================
-  // TANK CAPACITY METER
-  // ============================================
-  setupTank();
+void configTimeRun() {
+  time_t now = time(nullptr);
+  if (now < 100000 && WiFi.status() == WL_CONNECTED) {
+    // Synchronize time useing SNTP. This is necessary to verify that
+    // the TLS certificates offered by the server are currently valid
+    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+
+    Serial.print("Waiting for NTP time sync: ");
+    while (now < 100000) {
+        delay(100);
+        Serial.print(".");
+        now = time(nullptr);
+    }
+    Serial.println();
+    Serial.println("time synced");
+  }
 }
 
 void loop()
 {
   BlynkEdgent.run();
-  timeClient.update();
-
-  if (timeClient.isTimeSet()) {
-    runAlarms(timeClient);
-  }
-  runTank();
+  configTimeRun();
+  localOTALoop();
+  mqttLoop();
 }

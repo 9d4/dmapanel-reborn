@@ -1,7 +1,6 @@
 
 #include <Blynk/BlynkConsole.h>
 #include <EEPROM.h>
-#include <TimeAlarm.h>
 
 BlynkConsole    edgentConsole;
 
@@ -127,109 +126,12 @@ void console_init()
     }
   });
 
-  edgentConsole.addCommand("tank", [](int argc, const char** argv) {
-    if (argc > 0 && (0 == strcmp(argv[0], "high") || 0 == strcmp(argv[0], "up"))) {
-      int8_t val = digitalRead(TANK_HIGH_PIN);
-      printff("%d\n", val);
-      return;
-    }
-    if (argc > 0 && (0 == strcmp(argv[0], "low") || 0 == strcmp(argv[0], "down"))) {
-      int8_t val = digitalRead(TANK_LOW_PIN);
-      printff("%d\n", val);
-      return;
-    }
-    if (argc > 0 && 0 == strcmp(argv[0], "all")) {
-      int valLow = digitalRead(TANK_LOW_PIN);
-      int valHigh = digitalRead(TANK_HIGH_PIN);
-
-      printff("Low:%d \tHigh: %d\n", valLow, valHigh);
-      return;
-    }
-
-    int16_t value = analogRead(A0);
-    printff("%d\n", value);
-  });
-
-  edgentConsole.addCommand("alarm", [](int argc, const char** argv) {
-    if (argc < 1 || 0 == strcmp(argv[0], "show")) {
-      EEPROM.begin(3096);
-      uint8_t active = EEPROM.read(3089);
-      uint8_t hour = EEPROM.read(3090);
-      uint8_t minute = EEPROM.read(3091);
-      EEPROM.end();
-
-      String activeStr;
-      if (active == 1) {
-        activeStr = "on";
-      }else {
-        activeStr = "off";
-      }
-
-      printff("Alarm at %d:%d %s\n", hour, minute, activeStr.c_str());
-      return;
-    }
-
-    if (0 == strcmp(argv[0], "stop") && DefaultAlarm.playing) {
-      DefaultAlarm.playing = false;
-      DefaultAlarm.pauseUntil = millis() + (1000 * 60); // pause at least 1 min to prevent replay;
-      DefaultAlarm.paused = true;
-    }
-
-    if (0 == strcmp(argv[0], "on")) {
-      EEPROM.begin(3096);
-      EEPROM.write(3089, 1);
-      if (EEPROM.commit()) {
-        printff("Alarm on!\n");
-      }else {
-        printff("Cannot edit alarm!");
-      }
-      EEPROM.end();
-    }
-
-    if (0 == strcmp(argv[0], "off")) {
-      EEPROM.begin(3096);
-      EEPROM.write(3089, 0);
-      if (EEPROM.commit()) {
-        printff("Alarm off!\n");
-      }else {
-        printff("Cannot edit alarm!");
-      }
-      EEPROM.end();
-    }
-
-    if (0 == strcmp(argv[0], "set")) {
-      if (argc < 3) {
-        printff("Command invalid!\n");
-        printff("Usage: alarm set {hour} {minute}\n");
-        return;
-      }
-
-      int hour = atoi(String(argv[1]).c_str());
-      int minute = atoi(String(argv[2]).c_str());
-
-      if (
-        hour > 24 || hour < 0 ||
-        minute > 60 || minute < 0
-      ) {
-        printff("Invalid time input!\n");
-        return;
-      }
-
-      EEPROM.begin(3096);
-      EEPROM.write(3090, hour);
-      EEPROM.write(3091, minute);
-      if (EEPROM.commit()) {
-        printff("Alarm set! %d:%d\n", hour, minute);
-      }else {
-        printff("Cannot save alarm\n");
-      }
-      EEPROM.end();
-      return;
-    }
-  });
-
   edgentConsole.addCommand("time", [](int argc, const char** argv) {
-    printff("Now:  %d:%d:%d\n", timeClient.getHours(), timeClient.getMinutes(), timeClient.getSeconds());
+    time_t now = time(nullptr);
+    struct tm timeinfo;
+    gmtime_r(&now, &timeinfo);
+    Serial.print("Current time: ");
+    Serial.print(asctime(&timeinfo));
   });
 
   edgentConsole.addCommand("status", [](int argc, const char** argv) {
